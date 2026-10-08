@@ -2,9 +2,13 @@ import 'dotenv/config';
 import '@shopify/shopify-api/adapters/node';
 import {shopifyApi, ApiVersion} from '@shopify/shopify-api';
 
-const apiKey = process.env['API_KEY'] ?? '';
-const apiSecretKey = process.env['API_SECRET'] ?? '';
-const shopName = process.env['SHOP_NAME'] ?? '';
+const apiKey = process.env['API_KEY'] ?? null;
+const apiSecretKey = process.env['API_SECRET'] ?? null;
+const shopName = process.env['SHOP_NAME'] ?? null;
+
+if (apiKey === null || apiSecretKey === null || shopName === null) {
+    throw new Error("One or more required environment variables missing. Did you fill out the .env?");
+} 
 
 const shopify = shopifyApi({
   apiKey,
