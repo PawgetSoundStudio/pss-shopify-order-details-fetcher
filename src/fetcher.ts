@@ -3,7 +3,7 @@ import '@shopify/shopify-api/adapters/node';
 import {shopifyApi, ApiVersion} from '@shopify/shopify-api';
 import { type Item, type Order } from './models.ts';
 import { MaterialType } from './enums.ts';
-import { getValueForItemWithKey, letterFromIndex, stripNonNumbers } from './helpers.ts';
+import { getOptionalValueForItemWithKey, getRequiredValueForItemWithKey, letterFromIndex, stripNonNumbers } from './helpers.ts';
 
 const apiKey = process.env['API_KEY'] ?? null;
 const apiSecretKey = process.env['API_SECRET'] ?? null;
@@ -28,7 +28,7 @@ const auth = await shopify.auth.clientCredentials({
 const {session} = auth;
 const adminApi = new shopify.clients.Graphql({session});
 
-const id = "1026";
+const id = "1027";
 const order = await adminApi.request(
     `query OrderInfo($orderId: String!) {
         orders(first: 1, query: $orderId) {
@@ -41,6 +41,7 @@ const order = await adminApi.request(
                     discountCodes
                     email
                     id
+                    createdAt
                     name
                     lineItems(first: 10) {
                         edges {
@@ -82,6 +83,7 @@ const details = order.data["orders"]["edges"][0]["node"];
 console.log(JSON.stringify(details, null, 2));
 const storage: Order = {
     id,
+    date: details["createdAt"],
     discountCodes: details["discountCodes"],
     customer: {
         name: details["customer"]["displayName"],
@@ -94,14 +96,32 @@ const storage: Order = {
         const customAttributes = lineItem["customAttributes"];
         const variantMetafields = productVariant["metafields"]["edges"];
         return {
-            width: stripNonNumbers(getValueForItemWithKey(customAttributes, "Width")),
-            height: stripNonNumbers(getValueForItemWithKey(customAttributes, "Height")),
+            width: stripNonNumbers(getRequiredValueForItemWithKey(customAttributes, "Width")),
+            height: stripNonNumbers(getRequiredValueForItemWithKey(customAttributes, "Height")),
             itemQuantity: lineItem["quantity"],
-            stickerQuantity: getValueForItemWithKey(customAttributes, "Sticker Count"),
+            stickerQuantity: getRequiredValueForItemWithKey(customAttributes, "Sticker Count"),
+            // originalImageUrls: string[];
+            // baseMaterial: string;
+            // laminateMaterial?: string;
+            // shape: string;
+            // borderSize: string;
+            // TODO pull tab/accessibility options
+            instructions: getRequiredValueForItemWithKey(customAttributes, "Instructions"),
+            socialMediaPosting: (() => {
+                const str = getOptionalValueForItemWithKey(customAttributes, "Social Media");
+                return str != undefined && str.length > 0;
+             })(),
+            socialMediaHandle: getOptionalValueForItemWithKey(customAttributes, "Social Media Handle"),
         } as Item;
     }).reduce((arr, item, i) => ({...arr, [letterFromIndex(i)]: item}), {})
 };
 
+//download images
+
+//postprocess (ppi for requested size)
+
 const out = JSON.stringify(storage, null, 2);
 console.log(out);
+
+
 

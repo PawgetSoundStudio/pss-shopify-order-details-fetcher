@@ -21,10 +21,10 @@ export interface Item {
     originalImageUrls: string[];
     baseMaterial: string;
     laminateMaterial?: string;
-    //TODO
-    //border
-    //shape
-    //pull tab/accessibility options
-    //extra instructions
-    //social media
+    shape: string;
+    borderSize: string;
+    //TODO pull tab/accessibility options
+    instructions?: string;
+    socialMediaPosting: boolean;
+    socialMediaHandle?: string;
 }
