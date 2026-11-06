@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import readline from 'node:readline/promises';
 import '@shopify/shopify-api/adapters/node';
 import {shopifyApi, ApiVersion} from '@shopify/shopify-api';
 import { type Item, type Order } from './models.ts';
@@ -28,7 +29,16 @@ const auth = await shopify.auth.clientCredentials({
 const {session} = auth;
 const adminApi = new shopify.clients.Graphql({session});
 
-const id = "1027";
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+const id = await rl.question("What order do you want to get details for? ");
+if (id == null || id.length == 0) {
+    throw new Error("No id provided!");
+}
+rl.close();
+
 const order = await adminApi.request(
     `query OrderInfo($orderId: String!) {
         orders(first: 1, query: $orderId) {
