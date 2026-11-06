@@ -3,7 +3,10 @@
  * Useful for processing custom arrtibutes and metafields.
  */
 export function getValueForItemWithKey(array: {key: string, value: string}[], key: string): string | null {
-    return array.find(i => i.key == key)?.value ?? null;
+    var ret = array.find(i => i.key == key)?.value ?? null;
+    if (ret == null)
+        console.warn(`Couldn't find a value for item with key "${key}"!`);
+    return ret;
 }
 
 /**
@@ -20,5 +23,5 @@ export function stripNonNumbers(input: string | null): number | null {
  */
 export function letterFromIndex(index: number): string {
     //https://stackoverflow.com/a/36129812
-    return (index + 9).toString(36).toUpperCase();
+    return (index + 10).toString(36).toUpperCase();
 }

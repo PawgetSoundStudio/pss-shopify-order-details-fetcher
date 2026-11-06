@@ -36,6 +36,7 @@ const order = await adminApi.request(
                 node {
                     customer {
                         numberOfOrders
+                        displayName
                     }
                     discountCodes
                     email
@@ -83,11 +84,15 @@ const storage: Order = {
     id,
     discountCodes: details["discountCodes"],
     customer: {
+        name: details["customer"]["displayName"],
         numberOfOrders: details["customer"]["numberOfOrders"],
+        email: details["email"],
     },
     items: (details["lineItems"]["edges"] as Array<any>).map(e => {
         const lineItem: any = e["node"];
+        const productVariant: any = lineItem["variant"];
         const customAttributes = lineItem["customAttributes"];
+        const variantMetafields = productVariant["metafields"]["edges"];
         return {
             width: stripNonNumbers(getValueForItemWithKey(customAttributes, "Width")),
             height: stripNonNumbers(getValueForItemWithKey(customAttributes, "Height")),
