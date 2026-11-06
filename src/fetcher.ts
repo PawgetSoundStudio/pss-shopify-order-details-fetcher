@@ -4,7 +4,7 @@ import '@shopify/shopify-api/adapters/node';
 import {shopifyApi, ApiVersion} from '@shopify/shopify-api';
 import { type Item, type Order } from './models.ts';
 import { MaterialType } from './enums.ts';
-import { getOptionalValueForItemWithKey, getRequiredValueForItemWithKey, letterFromIndex, stripNonNumbers } from './helpers.ts';
+import { getOptionalValueForItemWithKey, getRequiredValueForItemWithKey, getUploadlyImagesForFieldName, letterFromIndex, stripNonNumbers } from './helpers.ts';
 
 const apiKey = process.env['API_KEY'] ?? null;
 const apiSecretKey = process.env['API_SECRET'] ?? null;
@@ -110,7 +110,7 @@ const storage: Order = {
             height: stripNonNumbers(getRequiredValueForItemWithKey(customAttributes, "Height")),
             itemQuantity: lineItem["quantity"],
             stickerQuantity: getRequiredValueForItemWithKey(customAttributes, "Sticker Count"),
-            // originalImageUrls: string[];
+            originalImageUrls: getUploadlyImagesForFieldName(customAttributes, "Upload Sticker Image"),
             // baseMaterial: string;
             // laminateMaterial?: string;
             // shape: string;

@@ -14,6 +14,26 @@ export function getOptionalValueForItemWithKey(array: {key: string, value: strin
 }
 
 /**
+ * Get the list of uploaded image direct URLs from an Uploadly field name.
+ */
+export function getUploadlyImagesForFieldName(customAttributes: {key: string, value: string}[], fieldName: string): string[] {
+    let flag = true;
+    let i = 1;
+    let ret: string[] = [];
+    while (flag) {
+        const testKey = `_${fieldName} ${i} (Direct Link)`;
+        var test = getOptionalValueForItemWithKey(customAttributes,testKey);
+        if (test != undefined) {
+            ret.push(test);
+            i++;
+        } else {
+            flag = false;
+        }
+    }
+    return ret;
+}
+
+/**
  * Strip all non number characters and parse to float.
  */
 export function stripNonNumbers(input: string | null): number | null {
