@@ -19,11 +19,12 @@ export interface Item {
     itemQuantity: number;
     stickerQuantity?: number;
     originalImageUrls: string[];
-    baseMaterial: string;
+    baseMaterial: MaterialType;
     laminateMaterial?: string;
     shape: string;
     borderSize: string;
     //TODO pull tab/accessibility options
+    whiteInkBehaviour?: WhiteInkBehaviour;
     instructions?: string;
     socialMediaPosting: boolean;
     socialMediaHandle?: string;

@@ -3,7 +3,7 @@ import readline from 'node:readline/promises';
 import '@shopify/shopify-api/adapters/node';
 import {shopifyApi, ApiVersion} from '@shopify/shopify-api';
 import { type Item, type Order } from './models.ts';
-import { MaterialType } from './enums.ts';
+import { LaminateType, MaterialType, WhiteInkBehaviour } from './enums.ts';
 import { getOptionalValueForItemWithKey, getRequiredValueForItemWithKey, getUploadlyImagesForFieldName, letterFromIndex, stripNonNumbers } from './helpers.ts';
 
 const apiKey = process.env['API_KEY'] ?? null;
@@ -111,11 +111,12 @@ const storage: Order = {
             itemQuantity: lineItem["quantity"],
             stickerQuantity: getRequiredValueForItemWithKey(customAttributes, "Sticker Count"),
             originalImageUrls: getUploadlyImagesForFieldName(customAttributes, "Upload Sticker Image"),
-            // baseMaterial: string;
-            // laminateMaterial?: string;
+            baseMaterial: MaterialType.fromAttribute(lineItem["title"]),
+            laminateMaterial: LaminateType.fromAttribute(getOptionalValueForItemWithKey(customAttributes, "Finish")),
             // shape: string;
-            // borderSize: string;
+            borderSize: getRequiredValueForItemWithKey(customAttributes, "Border Size"),
             // TODO pull tab/accessibility options
+            whiteInkBehaviour: WhiteInkBehaviour.fromAttribute(getOptionalValueForItemWithKey(customAttributes, "White Color")),
             instructions: getRequiredValueForItemWithKey(customAttributes, "Instructions"),
             socialMediaPosting: (() => {
                 const str = getOptionalValueForItemWithKey(customAttributes, "Social Media");
@@ -125,6 +126,8 @@ const storage: Order = {
         } as Item;
     }).reduce((arr, item, i) => ({...arr, [letterFromIndex(i)]: item}), {})
 };
+
+//create directory
 
 //download images
 
