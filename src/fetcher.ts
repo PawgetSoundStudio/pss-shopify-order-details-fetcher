@@ -1,5 +1,8 @@
 import 'dotenv/config';
 import readline from 'node:readline/promises';
+import fs, { writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { Readable } from 'node:stream';
 import '@shopify/shopify-api/adapters/node';
 import {shopifyApi, ApiVersion} from '@shopify/shopify-api';
 import { type Item, type Order } from './models.ts';
@@ -9,8 +12,9 @@ import { getOptionalValueForItemWithKey, getRequiredValueForItemWithKey, getUplo
 const apiKey = process.env['API_KEY'] ?? null;
 const apiSecretKey = process.env['API_SECRET'] ?? null;
 const shopName = process.env['SHOP_NAME'] ?? null;
+const baseFolder = process.env['BASE_FOLDER'] ?? null;
 
-if (apiKey === null || apiSecretKey === null || shopName === null) {
+if (apiKey === null || apiSecretKey === null || shopName === null || baseFolder === null) {
     throw new Error("One or more required environment variables missing. Did you fill out the .env?");
 } 
 
@@ -128,13 +132,27 @@ const storage: Order = {
 };
 
 //create directory
+const folder = path.join(baseFolder, id);
+await fs.mkdir(folder);
 
 //download images
+for (var key in storage.items) {
+    const item = storage.items[key];
+    for (let i = 0; i < item.originalImageUrls.length; i++) {
+        const extension = item.originalImageUrls[i].substring(item.originalImageUrls[i].lastIndexOf('.'));
+        const name = `${key}${item.originalImageUrls.length > 1 ? i : ''}.${extension}`;
+
+        const outPath = path.join(folder, name);
+        const { body } = await fetch(item.originalImageUrls[i]);
+        await writeFile(outPath, Readable.fromWeb(body));
+    }
+}
 
 //postprocess (ppi for requested size)
 
+
+//write storage
 const out = JSON.stringify(storage, null, 2);
 console.log(out);
-
-
-
+const outPath = path.join(folder, "details.json");
+await writeFile(outPath, out);
